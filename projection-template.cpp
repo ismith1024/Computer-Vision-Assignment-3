@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string>
-#include "opencv\cv.h"
-#include "opencv\cxcore.h"
-#include "opencv\highgui.h"
+#include "opencv/cv.h"
+#include "opencv/cxcore.h"
+#include "opencv/highgui.h"
 #include "opencv2/calib3d/calib3d.hpp"
 
 
@@ -132,7 +132,7 @@ int main() {
 			i, cvmGet(image_points, i, 0), cvmGet(image_points, i, 1));
 	}
 
-	computeprojectionmatrix(image_points, object_points, computed_projection_matrix);
+	/*computeprojectionmatrix(image_points, object_points, computed_projection_matrix);
 	decomposeprojectionmatrix(computed_projection_matrix, computed_rotation_matrix, computed_translation, computed_camera_matrix);
 
 	fprintf(fp, "\nComputed Rotation matrix\n");
@@ -149,9 +149,8 @@ int main() {
 	for (int i=0; i<3; i++) {
 		fprintf(fp, "%f %f %f\n", 
 			cvmGet(computed_camera_matrix,i,0), cvmGet(computed_camera_matrix,i,1), cvmGet(computed_camera_matrix,i,2));
-	}
+	}*/
 
-	fclose(fp);
-	//getchar();
+    fclose(fp);
     return 0;
 }
