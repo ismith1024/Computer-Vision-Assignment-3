@@ -12,16 +12,16 @@ Camera Calibration
 [-1100, 0, 0;
  0, -2200, 0;
  0, 0, 1]
-Image point 0 : (-3.66366e-24,575843)
-Image point 1 : (-2.08416,-2.43308)
-Image point 2 : (3.68711e+06,-0)
-Image point 3 : (-2.4793,-2.49469)
-Image point 4 : (-9.69678e-23,0)
-Image point 5 : (-2.22853,-2.31026)
-Image point 6 : (-51.2385,-inf)
-Image point 7 : (-2.44923,-1.73678)
-Image point 8 : (-inf,-8.0467e-06)
-Image point 9 : (-2.51698,-2.58232)
+Image point 0 : (-394.141,-1849.56)
+Image point 1 : (-2116.12,-2230.17)
+Image point 2 : (-787.303,-1104.96)
+Image point 3 : (-1941.62,-81.5762)
+Image point 4 : (-2339.5,-2952.24)
+Image point 5 : (-611.464,-259.037)
+Image point 6 : (-759.488,345.472)
+Image point 7 : (-5725.09,-7356.26)
+Image point 8 : (-510.508,-609.216)
+Image point 9 : (-1336.56,-1386.63)
 
 Computed Rotation matrix
 

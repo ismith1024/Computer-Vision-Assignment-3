@@ -91,12 +91,12 @@ int main() {
    		for (int j=0; j<3; j++) {
     		cvmSet(camera_matrix,i,j, intrinsic[i][j]);
     		cvmSet(rotation_matrix,i,j, projection[i][j]);
-    	}
+            }
 		fprintf(fp, "%f %f %f\n", 
 			cvmGet(rotation_matrix,i,0), cvmGet(rotation_matrix,i,1), cvmGet(rotation_matrix,i,2));
 	}
-    for (int i=0; i<3; i++)
-    	cvmSet(translation, i, 0, projection[i][3]);
+        
+        for (int i=0; i<3; i++) cvmSet(translation, i, 0, projection[i][3]);
 
 	fprintf(fp, "\nTranslation vector\n");
 	fprintf(fp, "%f %f %f\n", 
@@ -118,11 +118,47 @@ int main() {
 			i, all_object_points[i][0], all_object_points[i][1], all_object_points[i][2]);
 	}
 	fprintf(fp, "\n");
-	cvTranspose(object_points, transp_object_points);
+	cvTranspose(object_points, transp_object_points);        
+        
 
 	cvMatMul(&temp_intrinsic, &temp_projection, final_projection);
 	cvMatMul(final_projection, transp_object_points, transp_image_points);
 	//cvTranspose(transp_image_points, image_points);
+    
+        //print the final projection
+        printf("\nFinal Projection\n");
+        for (int i=0; i<3; i++) {
+		printf("%f %f %f %f\n", cvmGet(final_projection, i, 0), cvmGet(final_projection, i, 1), cvmGet(final_projection, i, 2), cvmGet(final_projection, i, 3));
+	}
+	
+	/*
+         Final projection:
+         -992.971130 -56.682999 -469.888092 -13200.000000
+        -402.571411 -1875.649536 1076.977051 -35200.000000
+        -0.389418 0.520070 0.760184 21.000000
+         */
+        
+        //print the transposed image
+        printf("\nTransposed image\n");
+        for (int i=0; i<10; i++) {
+            for(int j = 0; j < 3; ++j){
+		printf("%f ", cvmGet(transp_image_points, j, i));                
+            }
+            printf("\n");
+	}
+	
+	/*
+            -25601.914062 -120140.757812 64.956314 
+            -119370.312500 -125803.562500 56.409912 
+            -91725.734375 -128734.804688 116.506310 
+            -128683.328125 -5406.550781 66.276169 
+            -100945.937500 -127384.343750 43.148441 
+            -32331.232422 -13696.606445 52.875111 
+            -75217.734375 34214.636719 99.037361 
+            -58350.316406 -74975.242188 10.192032 
+            -41208.984375 -49176.886719 80.721565 
+            -101857.906250 -105673.687500 76.208794     
+         */
 
 
 	for (int i=0; i<NUM_POINTS; i++) {
@@ -131,6 +167,21 @@ int main() {
 		fprintf(fp, "Image point %d x %f y %f\n", 
 			i, cvmGet(image_points, i, 0), cvmGet(image_points, i, 1));
 	}
+	
+	/* Image points:
+                Image point 0 x -394.140503 y -1849.562378
+                Image point 1 x -2116.123047 y -2230.167725
+                Image point 2 x -787.302734 y -1104.959961
+                Image point 3 x -1941.622925 y -81.576088
+                Image point 4 x -2339.503662 y -2952.235107
+                Image point 5 x -611.464111 y -259.036926
+                Image point 6 x -759.488464 y 345.472015
+                Image point 7 x -5725.091797 y -7356.260742
+                Image point 8 x -510.507751 y -609.216248
+                Image point 9 x -1336.563721 y -1386.633789  
+         
+         */
+	
 
 	/*computeprojectionmatrix(image_points, object_points, computed_projection_matrix);
 	decomposeprojectionmatrix(computed_projection_matrix, computed_rotation_matrix, computed_translation, computed_camera_matrix);
