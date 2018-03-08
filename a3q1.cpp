@@ -14,8 +14,6 @@
 
 int main() {
 
-    const int NUM_POINTS = 10;
-
     cv::Mat objectPoints = (cv::Mat_<double>(10,4) << 0.1251, 56.3585, 19.3304, 1,
                                                         80.8741, 58.5009, 47.9873, 1,
                                                         35.0291, 89.5962, 82.2840, 1,
@@ -89,11 +87,8 @@ int main() {
 
     std::cout << std::endl << "Final Projection" << std::endl;
     std::cout << finalProjection << std::endl;
-
             
     cv::Mat transposedImagePoints = finalProjection * transposedObjectPoints; 
-
-                //COMMENTED OUT IN TEMPLATE cvTranspose(transp_image_points, image_points);
             
     std::cout << std::endl << "Transposed image points" << std::endl;
     std::cout << transposedImagePoints << std::endl;
@@ -103,7 +98,7 @@ int main() {
     std::cout << std::endl << "Image points:" << std::endl;
 
     //Compute the image points x = u/w, y = v/w
-    for (int i=0; i < NUM_POINTS; i++) {     
+    for (int i=0; i < NUM_POINTS; ++i) {     
             
         imagePoints.at<double>(i,0) = (transposedImagePoints.at<double>(0,i) / transposedImagePoints.at<double>(2,i));
         imagePoints.at<double>(i,1) = (transposedImagePoints.at<double>(1,i) / transposedImagePoints.at<double>(2,i));
@@ -114,17 +109,9 @@ int main() {
 
     //TODO -- write function to compute the projection matrix from image and object point correspondances
     //TODO -- write function to decompose this projection matrix
-    //computeprojectionmatrix(imagePoints, objectPoints, computedProjectionMatrix);
-    //decomposeprojectionmatrix(computedProjectionMatrix, computedRotationMatrix, computedTranslation, computed<<CameraMatrix);
+    //computeProjectionMatrix(imagePoints, objectPoints, computedProjectionMatrix);
+    //decomposeProjectionMatrix(computedProjectionMatrix, computedRotationMatrix, computedTranslation, computedCameraMatrix);
     
-    /*
-     // you write this routine
-void decomposeprojectionmatrix(cv::Mat& projection_matrix, cv::Mat& rotation_matrix, cv::Mat& translation, cv::Mat& camera_matrix);
-
-// you write this routine
-void computeprojectionmatrix(cv::Mat& image_points, cv::Mat& object_points, cv::Mat& projection_matrix);
-     */
-
     ///Print the results to console and file
     std::cout << std::endl << "Computed Rotation matrix" << std::endl;
     //std::cout << computed_rotation_matrix <<std::endl;
@@ -147,6 +134,25 @@ void computeprojectionmatrix(cv::Mat& image_points, cv::Mat& object_points, cv::
     fp.close();
     return 0;
 }
+
+////////////
+/// decomposeProjectionMatrix
+/// Decomposes a projection matrix into rotation, translation, and camera matrices
+void decomposeProjectionMatrix(cv::Mat& projMat, cv::Mat& rotMat, cv::Mat& transMat, cv::Mat& camMat){
+    
+}
+
+////////////
+/// computeProjectionMatrix
+/// computes a projection matrix given object and image point correspondances
+void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& projMat){
+    
+    
+    
+}
+
+
+
 
 /////////////// C STRUCT INITIALIZER FUNCTIONS
 /*

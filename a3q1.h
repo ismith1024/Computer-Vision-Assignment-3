@@ -4,10 +4,10 @@
 #include<iostream>
 #include<fstream>
 
-//#define NUM_POINTS    10
-#define RANGE         100.00
-#define MAX_CAMERAS   100 
-#define MAX_POINTS    3000
+const int NUM_POINTS = 10;
+const float RANGE = 100.00;
+const int MAX_CAMERAS = 100; 
+const int MAX_POINTS = 3000;
 
 void decomposeProjectionMatrix(cv::Mat&, cv::Mat&, cv::Mat&, cv::Mat&);
 void computeProjectionMatrix(cv::Mat&, cv::Mat&, cv::Mat&);

@@ -1,0 +1,66 @@
+/*
+
+---- Compute the Calibration Matrix M:
+
+1.  Obtain 7 corresponsdances of (x, y) <-> (X, Y, Z)
+
+2.  Compute the singular values of:
+
+    [ x1X1 x1Y1 x1Z1 x1 -y1X1 -y1Y1 -y1Z1 -y1 ]
+    [ x2X2 x2Y2 x2Z2 x2 -y2X2 -y2Y2 -y2Z2 -y2 ]
+    [ x3X3 x3Y3 x3Z3 x3 -y3X3 -y3Y3 -y3Z3 -y3 ]
+A = [ x4X4 x4Y4 x4Z4 x4 -y4X4 -y4Y4 -y4Z4 -y4 ]
+    [ x5X5 x5Y5 x5Z5 x5 -y5X5 -y5Y5 -y5Z5 -y5 ]
+    [ x6X6 x6Y6 x6Z6 x6 -y6X6 -y6Y6 -y6Z6 -y6 ]
+    [ x7X7 x7Y7 x7Z7 x7 -y7X7 -y7Y7 -y7Z7 -y7 ]
+    [ x8X8 x8Y8 x8Z8 x8 -y8X8 -y8Y8 -y8Z8 -y8 ]
+ 
+3.  The solution of A is the column corresponding to the smallest singular value obtained in 2.  Call this V.
+
+4.  Scale factor, gamma = sqrt(v1^2 + v2^2 + v3^3)
+
+5.  Aspect ration alpha = sqrt(v5^2 + v6^2 + v7^2) / gamma
+
+6.  Go back to v.  
+    [r21, r22, r23] = [v1, v2, v3] / gamma
+    [r11, r12, r13] = [v5, v6, v7] / (gamma * alpha)
+    Ty = v4 / gamma
+    Tx = v8 / (gamma * alpha)
+
+7.  [r3] = [r1] x [r2] (?)
+
+8.  Scale r1, r2, r3 such that r1^2 + r2^2 + r3^3 = 1 ==>  rn' = rn / sqrt(r1^2 + r2^2 + r3^2)
+
+9.  Check signs -- make sure that, for any arbitrary point:
+    
+        x(r11X + r12Y + r13Z + Ty) > 0
+    
+    If not, switch the signs of Tx, Ty calculated in 6.
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
