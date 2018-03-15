@@ -14,6 +14,7 @@
 
 int main() {
 
+    ///object point matrix: [X_n, Y_n, Z_n, 1]
     cv::Mat objectPoints = (cv::Mat_<double>(10,4) << 0.1251, 56.3585, 19.3304, 1.0,
                                                         80.8741, 58.5009, 47.9873, 1.0,
                                                         35.0291, 89.5962, 82.2840, 1.0,
@@ -25,11 +26,12 @@ int main() {
                                                         0.8911, 37.7880, 53.1663, 1.0,
                                                         57.1184, 60.1764, 60.7166, 1.0);
 
-
+    ///Given this projection matrix
     cv::Mat projection = (cv::Mat_<double>(3,4) <<  0.902701, 0.051530, 0.427171, 12.0, 
                                                     0.182987, 0.852568, -0.489535, 16.0, 
                                                     -0.389418, 0.520070, 0.760184, 21.0);
 
+    ///Given this intrinsic matrix
     cv::Mat intrinsic = (cv::Mat_<double>(3,3) << 	-1100.000000, 0.000000, 0.000000, 
                                                     0.000000, -2200.000000, 0.000000, 
                                                     0.000000, 0.000000, 1.000000);
@@ -39,16 +41,17 @@ int main() {
     cv::Mat computedRotationMatrix;	
     cv::Mat computedTranslation;
     cv::Mat imagePoints = (cv::Mat_<double>(10,2) << 0,0,0,0,0,0,0,0,0,0);
+    cv::Mat newImagePoints = (cv::Mat_<double>(10,2) << 0,0,0,0,0,0,0,0,0,0);
     cv::Mat rotationVector;
 
     cv::Mat computedProjectionMatrix;
 
 
-    //File for writing to
+    //Log file for writing results to
     std::ofstream fp;
     fp.open("assign3-out");
 
-    ///Set up camera, translation, and rotation matrix
+    ///Set up camera, translation, and rotation matrix and print to log file
     cv::Mat cameraMatrix = (cv::Mat_<double>(3,3) << 	intrinsic.at<double>(0,0), 0, 0,
                                                             0, intrinsic.at<double>(1,1), 0,
                                                             0 , 0, intrinsic.at<double>(2,2));
@@ -80,23 +83,36 @@ int main() {
 
     std::cout << std::endl << "Object Points" << std::endl;
     std::cout << objectPoints << std::endl;
+    
+    fp << std::endl << "Intrinsic" << std::endl;
+    fp << intrinsic << std::endl;
+
+    fp << std::endl << "Projection" << std::endl;
+    fp << projection << std::endl;
+
+    fp << std::endl << "Object Points" << std::endl;
+    fp << objectPoints << std::endl;
 
     //TODO -- Project the object points             
     cv::Mat transposedObjectPoints = objectPoints.t();
     cv::Mat finalProjection = intrinsic * projection; //cvMatMul(&temp_intrinsic, &temp_projection, final_projection);
 
-    std::cout << std::endl << "Final Projection" << std::endl;
+    std::cout << std::endl << "Projection" << std::endl;
     std::cout << finalProjection << std::endl;
+    fp << std::endl << "Projection" << std::endl;
+    fp << finalProjection << std::endl;
             
     cv::Mat transposedImagePoints = finalProjection * transposedObjectPoints; 
             
     std::cout << std::endl << "Transposed image points" << std::endl;
     std::cout << transposedImagePoints << std::endl;
-            
-    //std::cout << "Temp transposed image points: " << std::endl << transposedImagePoints.t() << std::endl;
+    
+    fp << std::endl << "Transposed image points" << std::endl;
+    fp << transposedImagePoints << std::endl;
             
     std::cout << std::endl << "Image points:" << std::endl;
-
+    fp << std::endl << "Image points:" << std::endl;
+    
     //Compute the image points x = u/w, y = v/w
     for (int i=0; i < NUM_POINTS; ++i) {     
             
@@ -107,13 +123,28 @@ int main() {
         fp << "Image point " << i << " : (" << imagePoints.at<double>(i,0) << "," << imagePoints.at<double>(i,1) << ")" << std::endl; 
     }
 
-    //TODO -- write function to compute the projection matrix from image and object point correspondances
-    //TODO -- write function to decompose this projection matrix
-    //cv::Mat ip = transposedImagePoints.t();
+    ///Compute the projection matrix
+    computeProjectionMatrix(imagePoints, objectPoints, computedProjectionMatrix, fp);
     
-    computeProjectionMatrix(imagePoints, objectPoints, computedProjectionMatrix);
+    std::cout << std::endl << std::endl << "==== Verify computed projection matrix ==== " << std::endl;
+    cv::Mat compImagePts = computedProjectionMatrix * transposedObjectPoints;
+    
+    std::cout << std::endl << "Projection of orignal image points using computed M: " << std::endl;
+        //Compute the image points x = u/w, y = v/w
+    for (int i=0; i < NUM_POINTS; ++i) {     
+            
+        newImagePoints.at<double>(i,0) = (compImagePts.at<double>(0,i) / compImagePts.at<double>(2,i));
+        newImagePoints.at<double>(i,1) = (compImagePts.at<double>(1,i) / compImagePts.at<double>(2,i));
+        
+        std::cout << "Image point " << i << " : (" << newImagePoints.at<double>(i,0) << "," << newImagePoints.at<double>(i,1) << ")" << std::endl; 
+        fp << "Image point " << i << " : (" << newImagePoints.at<double>(i,0) << "," << newImagePoints.at<double>(i,1) << ")" << std::endl; 
+    }
+    
+    cv::Mat deltas = imagePoints - newImagePoints;
+    std::cout << std::endl << "[Image points from original M] - [Image points from computed M]: " << std::endl << deltas << std::endl;
+    
     //decomposeProjectionMatrix(computedProjectionMatrix, computedRotationMatrix, computedTranslation, computedCameraMatrix);
-    
+     
     ///Print the results to console and file
     std::cout << std::endl << "Computed Rotation matrix" << std::endl;
     //std::cout << computed_rotation_matrix <<std::endl;
@@ -146,9 +177,9 @@ void decomposeProjectionMatrix(cv::Mat& projMat, cv::Mat& rotMat, cv::Mat& trans
 
 ////////////
 /// computeProjectionMatrix
-/// computes a projection matrix given object and image point correspondances
-void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& projMat){
-    //You first create the A matrix which is a 2n by 12 matrix,
+/// computes a projection matrix given object and image point correspondances using singular value decomposition
+void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& projMat, std::ofstream& fp){
+    //Create the A matrix which is a 2n by 12 matrix,
     //      [X1 Y1  Z1  1   0   0   0   0   -x1X1   -x1Y1   -x1Z1   -x1]
     //      [0  0   0   0   X1  Y1  Z1  1   -y1X1   -y1Y1   -y1Z1   -y1]
     // A =  [ ...
@@ -165,8 +196,8 @@ void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& pro
         double Xn = objectPts.at<double>(n,0);
         double Yn = objectPts.at<double>(n,1);
         double Zn = objectPts.at<double>(n,2);
-        double x_n = imagePts.at<double>(n,0);// / imagePts.at<double>(i,2);
-        double y_n = imagePts.at<double>(n,1);// / imagePts.at<double>(i,2);
+        double x_n = imagePts.at<double>(n,0);
+        double y_n = imagePts.at<double>(n,1);
         
         //row i
         a.at<double>(i,0) = Xn; //Xn
@@ -196,16 +227,58 @@ void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& pro
         a.at<double>(i+1,10) = -1.0 * y_n * Zn; //-ynZn
         a.at<double>(i+1,11) = -1.0 * y_n; //-yn
         
-    } //correct
+    }
+    
+    std::cout << std::endl << std::endl << " ================== ComputeProjectionMatrix Function ========= " << std::endl;        
+    fp << std::endl << std::endl << " ================== ComputeProjectionMatrix Function ========= " << std::endl;
     
     std::cout << std::endl << " --------------------- A Matrix ----------" << std::endl << a << std::endl;
+    fp << std::endl << " --------------------- A Matrix ----------" << std::endl << a << std::endl;
+        
+    cv::SVD svd_a(a);
     
-    cv::Mat aTrans = a.t();
+    //for debugging
+    cv::Mat smallestSingVect = (cv::Mat_<double>(A_COLS,1) << 
+                                svd_a.vt.at<double>(A_COLS-1, 0),
+                                svd_a.vt.at<double>(A_COLS-1, 1),
+                                svd_a.vt.at<double>(A_COLS-1, 2),
+                                svd_a.vt.at<double>(A_COLS-1, 3),
+                                svd_a.vt.at<double>(A_COLS-1, 4),
+                                svd_a.vt.at<double>(A_COLS-1, 5),
+                                svd_a.vt.at<double>(A_COLS-1, 6),
+                                svd_a.vt.at<double>(A_COLS-1, 7),
+                                svd_a.vt.at<double>(A_COLS-1, 8),
+                                svd_a.vt.at<double>(A_COLS-1, 9),
+                                svd_a.vt.at<double>(A_COLS-1, 10),
+                                svd_a.vt.at<double>(A_COLS-1, 11));
+    std::cout << std::endl << "Smallest Singular Vector: " << std::endl << smallestSingVect << std::endl;
+    fp << std::endl << "Smallest Singular Vector: " << std::endl << smallestSingVect << std::endl;
     
-    std::cout << std::endl << " --------------------- A Transpose ----------" << std::endl << aTrans << std::endl;
+    projMat = (cv::Mat_<double>(3,4) << 
+                                svd_a.vt.at<double>(A_COLS-1, 0),
+                                svd_a.vt.at<double>(A_COLS-1, 1),
+                                svd_a.vt.at<double>(A_COLS-1, 2),
+                                svd_a.vt.at<double>(A_COLS-1, 3),
+                                svd_a.vt.at<double>(A_COLS-1, 4),
+                                svd_a.vt.at<double>(A_COLS-1, 5),
+                                svd_a.vt.at<double>(A_COLS-1, 6),
+                                svd_a.vt.at<double>(A_COLS-1, 7),
+                                svd_a.vt.at<double>(A_COLS-1, 8),
+                                svd_a.vt.at<double>(A_COLS-1, 9),
+                                svd_a.vt.at<double>(A_COLS-1, 10),
+                                svd_a.vt.at<double>(A_COLS-1, 11));    
     
-    ///////// Eigen solution
-    cv::Mat at_a = aTrans * a;
+    std::cout << std::endl<< " --------- M Matrix computed from singular vector: " << std::endl << projMat << std::endl;
+    fp << std::endl << " --------- M Matrix computed from singular vector: " << std::endl << projMat << std::endl;
+   
+}
+
+
+
+ 
+
+///////// This is the unused Eigenvalue solution -- I used SVD instead
+    /*cv::Mat at_a = aTrans * a;
     
     std::cout << std::endl << " --------------------- A^T * A ----------" << std::endl << at_a << std::endl;
     
@@ -249,160 +322,8 @@ void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& pro
     
     std::cout << "Comp M: " << compM << std::endl;
     
-    cv::Mat exampleObjPt = (cv::Mat_<double>(1,4) << /*80.8741, 58.5009, 47.9873, 1);*/ 0.1251, 56.3585, 19.3304, 1);
+    cv::Mat exampleObjPt = (cv::Mat_<double>(1,4) << /*80.8741, 58.5009, 47.9873, 1);* / 0.1251, 56.3585, 19.3304, 1);
     
     cv::Mat exampleImgPt = exampleObjPt * compM.t();
     
-    std::cout << "Sample projection Eigen" << std::endl << exampleObjPt << std::endl << "Point: " << (exampleImgPt.at<double>(0,0) / exampleImgPt.at<double>(0,2)) << "," << (exampleImgPt.at<double>(0,1) / exampleImgPt.at<double>(0,2)) << ")" << std::endl;
-    
-    
-    ////////////////////// Tried SVD, not working
-    cv::SVD svd_a(a);
-    
-    cv::Mat v = svd_a.vt.t();
-    
-    /*std::cout << "W: " << svd_a.w << std::endl;
-    std::cout << "U: " << svd_a.u << std::endl;
-    std::cout << "VT: " << svd_a.vt << std::endl;
-    std::cout << "V: " << v << std::endl;
-    */
-    
-    std::cout << "Last col of U: " << std::endl;
-    for(int i = 0; i < A_COLS; ++i){
-        std::cout << svd_a.u.at<double>(i, A_COLS-1) << std::endl;
-    }
-    
-    /*std::cout << "Last col of VT: " << std::endl;
-    for(int i = 0; i < A_COLS; ++i){
-        std::cout << svd_a.vt.at<double>(i, A_COLS-1) << std::endl;
-    }*/
-    
-    std::cout << "Last col of V: " << std::endl;
-    for(int i = 0; i < A_COLS; ++i){
-        std::cout << v.at<double>(i, A_COLS-1) << std::endl;
-    }    
-    
-    cv::Mat smallestSingVect = (cv::Mat_<double>(A_COLS,1) << 
-                                svd_a.vt.at<double>(A_COLS-1, 0),
-                                svd_a.vt.at<double>(A_COLS-1, 1),
-                                svd_a.vt.at<double>(A_COLS-1, 2),
-                                svd_a.vt.at<double>(A_COLS-1, 3),
-                                svd_a.vt.at<double>(A_COLS-1, 4),
-                                svd_a.vt.at<double>(A_COLS-1, 5),
-                                svd_a.vt.at<double>(A_COLS-1, 6),
-                                svd_a.vt.at<double>(A_COLS-1, 7),
-                                svd_a.vt.at<double>(A_COLS-1, 8),
-                                svd_a.vt.at<double>(A_COLS-1, 9),
-                                svd_a.vt.at<double>(A_COLS-1, 10),
-                                svd_a.vt.at<double>(A_COLS-1, 11));
-    std::cout << "Smallest Singular Vector: " << smallestSingVect << std::endl;
-    
-    cv::Mat compM2 = (cv::Mat_<double>(3,4) << 
-                                svd_a.vt.at<double>(A_COLS-1, 0),
-                                svd_a.vt.at<double>(A_COLS-1, 1),
-                                svd_a.vt.at<double>(A_COLS-1, 2),
-                                svd_a.vt.at<double>(A_COLS-1, 3),
-                                svd_a.vt.at<double>(A_COLS-1, 4),
-                                svd_a.vt.at<double>(A_COLS-1, 5),
-                                svd_a.vt.at<double>(A_COLS-1, 6),
-                                svd_a.vt.at<double>(A_COLS-1, 7),
-                                svd_a.vt.at<double>(A_COLS-1, 8),
-                                svd_a.vt.at<double>(A_COLS-1, 9),
-                                svd_a.vt.at<double>(A_COLS-1, 10),
-                                svd_a.vt.at<double>(A_COLS-1, 11));
-                                /*v.at<double>(0, A_COLS-1),
-                                v.at<double>(1, A_COLS-1),
-                                v.at<double>(2, A_COLS-1),
-                                v.at<double>(3, A_COLS-1),
-                                v.at<double>(4, A_COLS-1),
-                                v.at<double>(5, A_COLS-1),
-                                v.at<double>(6, A_COLS-1),
-                                v.at<double>(7, A_COLS-1),
-                                v.at<double>(8, A_COLS-1),
-                                v.at<double>(9, A_COLS-1),
-                                v.at<double>(10, A_COLS-1),
-                                v.at<double>(11, A_COLS-1));*/
-                                /*svd_a.u.at<double>(0, A_COLS-1),
-                                svd_a.u.at<double>(1, A_COLS-1),
-                                svd_a.u.at<double>(2, A_COLS-1),
-                                svd_a.u.at<double>(3, A_COLS-1),
-                                svd_a.u.at<double>(4, A_COLS-1),
-                                svd_a.u.at<double>(5, A_COLS-1),
-                                svd_a.u.at<double>(6, A_COLS-1),
-                                svd_a.u.at<double>(7, A_COLS-1),
-                                svd_a.u.at<double>(8, A_COLS-1),
-                                svd_a.u.at<double>(9, A_COLS-1),
-                                svd_a.u.at<double>(10, A_COLS-1),
-                                svd_a.u.at<double>(11, A_COLS-1));*/
-    
-    
-    std::cout << "SVD Comp M: " << compM2 << std::endl;//*/
-    
-    cv::Mat exampleObjPt2 = (cv::Mat_<double>(1,4) << /*80.8741, 58.5009, 47.9873, 1);*/ 0.1251, 56.3585, 19.3304, 1);
-    
-    cv::Mat exampleImgPt2 = exampleObjPt2 * compM2.t();
-    
-    std::cout << "Sample projection SVD" << std::endl << exampleObjPt2 << std::endl << "Point: " <<exampleImgPt2 << (exampleImgPt2.at<double>(0,0) / exampleImgPt2.at<double>(0,2)) << "," << (exampleImgPt2.at<double>(0,1) / exampleImgPt2.at<double>(0,2)) << ")" << std::endl;
-    
-    /*cv::Mat recoveredProjection = objectPts * compM.t();
-    
-    for(int i = 0; i < NUM_POINTS; ++i){
-            std::cout << "Image point " << i << " : (" << recoveredProjection.at<double>(i,0)/recoveredProjection.at<double>(i,2) << "," << recoveredProjection.at<double>(i,1)/recoveredProjection.at<double>(i,2) << ")" << std::endl; 
-    } */
-    
-}
-
-
-
- 
-/////////////// C STRUCT INITIALIZER FUNCTIONS
-/*
-	//cvInitMatHeader(&temp_projection, 3, 4, CV_32FC1, projection);
-	//cvInitMatHeader(&temp_intrinsic, 3, 3, CV_32FC1, intrinsic);
-
-	//final_projection = cvCreateMat(3, 4, CV_32F);
-
-	//object_points = cvCreateMat(NUM_POINTS, 4, CV_32F);
-	//transp_object_points = cvCreateMat(4, NUM_POINTS, CV_32F);
-
-	//image_points = cvCreateMat(NUM_POINTS, 3, CV_32F);
-	//transp_image_points = cvCreateMat(3, NUM_POINTS, CV_32F);
-
-	//rot_vector = cvCreateMat(3, 1, CV_32F);
-    //camera_matrix = cvCreateMat(3, 3, CV_32F);
-    //rotation_matrix = cvCreateMat(3, 3, CV_32F);
-    //translation = cvCreateMat(3, 1, CV_32F);
-
-    //computed_camera_matrix = cvCreateMat(3, 3, CV_32F);
-    //computed_rotation_matrix = cvCreateMat(3, 3, CV_32F);
-    //computed_translation = cvCreateMat(3, 1, CV_32F);
-	//computed_projection_matrix = cvCreateMat(3, 4, CV_32F);
-
-*/
-
-/*float projection[3][4] = {
-0.902701, 0.051530, 0.427171, 12.0,
-0.182987, 0.852568, -0.489535, 16.0,
--0.389418, 0.520070, 0.760184, 21.0,
-};
-
-float intrinsic[3][3] = {
--1100.000000, 0.000000, 0.000000, 
-0.000000, -2200.000000, 0.000000, 
-0.000000, 0.000000,     1.000000,
-};
-
-float all_object_points[10][3] = {
-0.1251, 56.3585, 19.3304, 
-80.8741, 58.5009, 47.9873,
-35.0291, 89.5962, 82.2840,
-74.6605, 17.4108, 85.8943,
-71.0501, 51.3535, 30.3995,
-1.4985, 9.1403, 36.4452,
-14.7313, 16.5899, 98.8525,
-44.5692, 11.9083, 0.4669,
-0.8911, 37.7880, 53.1663,
-57.1184, 60.1764, 60.7166
-};
-
-*/
+    std::cout << "Sample projection Eigen" << std::endl << exampleObjPt << std::endl << "Point: " << (exampleImgPt.at<double>(0,0) / exampleImgPt.at<double>(0,2)) << "," << (exampleImgPt.at<double>(0,1) / exampleImgPt.at<double>(0,2)) << ")" << std::endl;*/
