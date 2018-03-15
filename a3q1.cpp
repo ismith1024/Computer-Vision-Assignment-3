@@ -283,33 +283,33 @@ void computeProjectionMatrix(cv::Mat& imagePts, cv::Mat& objectPts, cv::Mat& pro
     }    
     
     cv::Mat smallestSingVect = (cv::Mat_<double>(A_COLS,1) << 
-                                svd_a.vt.at<double>(0, A_COLS-1),
-                                svd_a.vt.at<double>(1, A_COLS-1),
-                                svd_a.vt.at<double>(2, A_COLS-1),
-                                svd_a.vt.at<double>(3, A_COLS-1),
-                                svd_a.vt.at<double>(4, A_COLS-1),
-                                svd_a.vt.at<double>(5, A_COLS-1),
-                                svd_a.vt.at<double>(6, A_COLS-1),
-                                svd_a.vt.at<double>(7, A_COLS-1),
-                                svd_a.vt.at<double>(8, A_COLS-1),
-                                svd_a.vt.at<double>(9, A_COLS-1),
-                                svd_a.vt.at<double>(10, A_COLS-1),
-                                svd_a.vt.at<double>(11, A_COLS-1));
+                                svd_a.vt.at<double>(A_COLS-1, 0),
+                                svd_a.vt.at<double>(A_COLS-1, 1),
+                                svd_a.vt.at<double>(A_COLS-1, 2),
+                                svd_a.vt.at<double>(A_COLS-1, 3),
+                                svd_a.vt.at<double>(A_COLS-1, 4),
+                                svd_a.vt.at<double>(A_COLS-1, 5),
+                                svd_a.vt.at<double>(A_COLS-1, 6),
+                                svd_a.vt.at<double>(A_COLS-1, 7),
+                                svd_a.vt.at<double>(A_COLS-1, 8),
+                                svd_a.vt.at<double>(A_COLS-1, 9),
+                                svd_a.vt.at<double>(A_COLS-1, 10),
+                                svd_a.vt.at<double>(A_COLS-1, 11));
     std::cout << "Smallest Singular Vector: " << smallestSingVect << std::endl;
     
     cv::Mat compM2 = (cv::Mat_<double>(3,4) << 
-                                svd_a.vt.at<double>(0, A_COLS-1),
-                                svd_a.vt.at<double>(1, A_COLS-1),
-                                svd_a.vt.at<double>(2, A_COLS-1),
-                                svd_a.vt.at<double>(3, A_COLS-1),
-                                svd_a.vt.at<double>(4, A_COLS-1),
-                                svd_a.vt.at<double>(5, A_COLS-1),
-                                svd_a.vt.at<double>(6, A_COLS-1),
-                                svd_a.vt.at<double>(7, A_COLS-1),
-                                svd_a.vt.at<double>(8, A_COLS-1),
-                                svd_a.vt.at<double>(9, A_COLS-1),
-                                svd_a.vt.at<double>(10, A_COLS-1),
-                                svd_a.vt.at<double>(11, A_COLS-1));
+                                svd_a.vt.at<double>(A_COLS-1, 0),
+                                svd_a.vt.at<double>(A_COLS-1, 1),
+                                svd_a.vt.at<double>(A_COLS-1, 2),
+                                svd_a.vt.at<double>(A_COLS-1, 3),
+                                svd_a.vt.at<double>(A_COLS-1, 4),
+                                svd_a.vt.at<double>(A_COLS-1, 5),
+                                svd_a.vt.at<double>(A_COLS-1, 6),
+                                svd_a.vt.at<double>(A_COLS-1, 7),
+                                svd_a.vt.at<double>(A_COLS-1, 8),
+                                svd_a.vt.at<double>(A_COLS-1, 9),
+                                svd_a.vt.at<double>(A_COLS-1, 10),
+                                svd_a.vt.at<double>(A_COLS-1, 11));
                                 /*v.at<double>(0, A_COLS-1),
                                 v.at<double>(1, A_COLS-1),
                                 v.at<double>(2, A_COLS-1),
