@@ -67,9 +67,9 @@ int main() {
                                                     0.000000, 0.000000, 1.000000);
 
 
-    cv::Mat computedCameraMatrix;
-    cv::Mat computedRotationMatrix;
-    cv::Mat computedTranslation;
+    cv::Mat computedCameraMatrix = (cv::Mat_<double>(3,3) << 0,0,0,0,0,0,0,0,0);
+    cv::Mat computedRotationMatrix = (cv::Mat_<double>(3,3) << 0,0,0,0,0,0,0,0,0);
+    cv::Mat computedTranslation = (cv::Mat_<double>(1,3) << 0,0,0);
     cv::Mat imagePoints = (cv::Mat_<double>(10,2) << 0,0,0,0,0,0,0,0,0,0);
     cv::Mat newImagePoints = (cv::Mat_<double>(10,2) << 0,0,0,0,0,0,0,0,0,0);
     cv::Mat rotationVector;
@@ -86,9 +86,9 @@ int main() {
                                                             0, intrinsic.at<double>(1,1), 0,
                                                             0 , 0, intrinsic.at<double>(2,2));
 
-    cv::Mat rotationMatrix = (cv::Mat_<double>(3,3) << 	projection.at<double>(0,0), 0, 0,
-                                                            0, projection.at<double>(1,1), 0,
-                                                            0 , 0, projection.at<double>(2,2));
+    cv::Mat rotationMatrix = (cv::Mat_<double>(3,3) << 	projection.at<double>(0,0), projection.at<double>(0,1), projection.at<double>(0,2),
+                                                        projection.at<double>(1,0), projection.at<double>(1,1), projection.at<double>(1,2),
+                                                        projection.at<double>(2,0) , projection.at<double>(2,1), projection.at<double>(2,2));
 
     cv::Mat translation = (cv::Mat_<double>(3,1) << projection.at<double>(0,3), projection.at<double>(1,3), projection.at<double>(2,3));
             
@@ -176,25 +176,25 @@ int main() {
     fp << std::endl << "[Image points from original M] - [Image points from computed M]: " << std::endl << deltas << std::endl;
     
     //Decompose the projection matrix
-    //decomposeProjectionMatrix(computedProjectionMatrix, computedRotationMatrix, computedTranslation, computedCameraMatrix);
+    decomposeProjectionMatrix(computedProjectionMatrix, computedRotationMatrix, computedTranslation, computedCameraMatrix, fp);
      
     ///Print the results to console and file
-    std::cout << std::endl << "Computed Rotation matrix" << std::endl;
+    //std::cout << std::endl << "Computed Rotation matrix" << std::endl;
     //std::cout << computed_rotation_matrix <<std::endl;
 
-    std::cout << std::endl << "Computed Translation vector" << std::endl;
+    //std::cout << std::endl << "Computed Translation vector" << std::endl;
     //std::cout << computed_translation << std::endl;
 
-    std::cout << std::endl << "Computed Camera Calibration" << std::endl;
+    //std::cout << std::endl << "Computed Camera Calibration" << std::endl;
     //std::cout << computed_camera_matrix << std::endl;
 
-    fp << std::endl << "Computed Rotation matrix" << std::endl;
+    //fp << std::endl << "Computed Rotation matrix" << std::endl;
     //fp << computed_rotation_matrix <<std::endl;
 
-    fp << std::endl << "Computed Translation vector" << std::endl;
+    //fp << std::endl << "Computed Translation vector" << std::endl;
     //fp << computed_translation << std::endl;
 
-    fp << std::endl << "Computed Camera Calibration" << std::endl;
+    //fp << std::endl << "Computed Camera Calibration" << std::endl;
     //fp << computed_camera_matrix << std::endl;
 
     fp.close();
@@ -204,7 +204,82 @@ int main() {
 ////////////
 /// decomposeProjectionMatrix
 /// Decomposes a projection matrix into rotation, translation, and camera matrices
-void decomposeProjectionMatrix(cv::Mat& projMat, cv::Mat& rotMat, cv::Mat& transMat, cv::Mat& camMat){
+void decomposeProjectionMatrix(cv::Mat& projMat, cv::Mat& rotMat, cv::Mat& transMat, cv::Mat& camMat, std::ofstream& fp){        
+    std::cout << std::endl << std::endl << " ================== DecomposeProjectionMatrix Function ========= " << std::endl;        
+    fp << std::endl << std::endl << " ================== DecomposeProjectionMatrix Function ========= " << std::endl;
+    
+    //compute gamma
+    double gamma = sqrt( pow(projMat.at<double>(2,0), 2) + pow(projMat.at<double>(2,1), 2) + pow(projMat.at<double>(2,2), 2));
+    
+    std::cout << "Gamma: " << gamma << std::endl << std::endl;
+    fp << "Gamma: " << gamma << std::endl << std::endl;
+    
+    //compute sigma
+    double sigma = 1.0;
+    if(projMat.at<double>(2, 3) < 0) sigma = -1.0;
+    
+    //Factor out the scalar gamma from computed projection matrix
+    cv::Mat nProjMat = projMat * (1/gamma);
+    
+    std::cout << "Normalized Projection Matrix: " << std::endl << nProjMat << std::endl << std::endl; 
+    fp << "Normalized Projection Matrix: " << std::endl << nProjMat << std::endl << std::endl; 
+
+    //compute r3i
+    for(int i = 0; i < 3; ++i){
+        rotMat.at<double>(2,i) = sigma * nProjMat.at<double>(2,i);
+    }
+    
+    //extract tz:
+    double tz = sigma * nProjMat.at<double>(2, 3);
+    
+    //Have now recovered Tz, r31, r32, r33
+    std::cout << "Tz: " << tz << " r31: " << rotMat.at<double>(2,0) << " r32: " <<  rotMat.at<double>(2,1) << " r33: " << rotMat.at<double>(2,2) << std::endl << std::endl;
+    fp << "Tz: " << tz << " r31: " << rotMat.at<double>(2,0) << " r32: " <<  rotMat.at<double>(2,1) << " r33: " << rotMat.at<double>(2,2) << std::endl << std::endl;   
+
+    //Compute o_x = [q1].[q3]
+    double o_x = (nProjMat.at<double>(0, 0) * nProjMat.at<double>(2, 0) ) + (nProjMat.at<double>(0, 1) * nProjMat.at<double>(2, 1)) + (nProjMat.at<double>(0, 2) * nProjMat.at<double>(2, 2));
+    //o_y = [q2].[q3]
+    double o_y = (nProjMat.at<double>(1, 0) * nProjMat.at<double>(2, 0)) + (nProjMat.at<double>(1, 1) * nProjMat.at<double>(2, 1)) + (nProjMat.at<double>(1, 2) * nProjMat.at<double>(2, 2));
+    
+    //Have now recovered ox, oy
+    std::cout << "o_x: " << o_x << " o_y: " << o_y << std::endl << std::endl;
+    fp << "o_x: " << o_x << " o_y: " << o_y << std::endl << std::endl;
+    
+    //Fx = sqrt(q1.q1 - o_x^2)
+    double fx = sqrt(pow(nProjMat.at<double>(0, 0),2) + pow(nProjMat.at<double>(0, 1),2) + pow(nProjMat.at<double>(0, 2),2) - pow(o_x, 2));
+    
+    //Fy = sqrt(q2.q2 - o_y^2)
+    double fy = sqrt( pow(nProjMat.at<double>(1, 0),2) + pow(nProjMat.at<double>(1, 1),2) + pow(nProjMat.at<double>(1, 2),2) - pow(o_y, 2));
+    
+    std::cout << "fx: " << fx << " fy: " << fy << std::endl;
+    
+    for(int i = 0; i < 3; ++i){
+        rotMat.at<double>(0,i) = sigma * (o_x * nProjMat.at<double>(2,i) - nProjMat.at<double>(0,i))/fx;
+        rotMat.at<double>(1,i) = sigma * (o_y * nProjMat.at<double>(2,i) - nProjMat.at<double>(1,i))/fy;
+    }
+    
+    double tx = sigma * 1/fx * (o_x * tz - nProjMat.at<double>(0, 3));    
+    double ty = sigma * 1/fy * (o_y * tz - nProjMat.at<double>(1, 3));
+    
+    transMat.at<double>(0,0) = tx;
+    transMat.at<double>(0,1) = ty;
+    transMat.at<double>(0,2) = tz;
+    
+    camMat.at<double>(0,0) = fx;
+    camMat.at<double>(1,1) = fy;
+    camMat.at<double>(2,2) = 1.0;
+    camMat.at<double>(0,2) = o_x;
+    camMat.at<double>(1,2) = o_y;
+    
+    std::cout << std::endl << "----- Final results:" << std::endl;
+    std::cout << "Rotation matrix " << std::endl << rotMat << std::endl << std::endl;
+    std::cout << "Translation matrix " << std::endl << transMat << std::endl << std::endl;
+    std::cout << "Camera matrix " << std::endl << camMat << std::endl << std::endl;  
+    
+    fp << std::endl << "----- Final results:" << std::endl;
+    fp << "Rotation matrix " << std::endl << rotMat << std::endl << std::endl;
+    fp << "Translation matrix " << std::endl << transMat << std::endl << std::endl;
+    fp << "Camera matrix " << std::endl << camMat << std::endl << std::endl; 
     
 }
 
