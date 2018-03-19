@@ -62,7 +62,8 @@ int main(void)
     //apply the homography to the keble-a-half image we want to warp
     warpPerspective(img1, img3, homography, img3.size());
     
-    imshow("Warped",img3);
+    //imshow("Warped",img3);
+    imwrite("Warped.jpg", img3);
     waitKey(0);
         
     //Mat med2 = Mat(img2.rows, img2.cols, CV_8UC1);
@@ -86,6 +87,12 @@ int main(void)
     imshow("Input2",img2);
     imshow("Merged using OR",img3);
     imshow("Merged using median",med3);
+    
+
+    imwrite("Merged.jpg", img3);
+    imwrite("Corrected.jpg", med3);
+    
+    
     waitKey(0);
 
     return 0;
