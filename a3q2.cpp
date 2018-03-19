@@ -65,16 +65,16 @@ int main(void)
     imshow("Warped",img3);
     waitKey(0);
         
-    Mat blur2 = Mat(img2.rows, img2.cols, CV_8UC1);
-    Mat blur3 = Mat(img3.rows, img3.cols, CV_8UC1);
-    
-    /*cv::blur(img2, blur2, cv::Size(3, 3)); 
-    cv::blur(img3, blur3, cv::Size(3, 3));*/
-    
-    //corrected for grainy images
-    /*for(int i = 0; i < blur2.cols; ++i) for(int j = 0; j < blur2.rows; ++j){
-        blur3.at<uchar>(j,i) = blur3.at<uchar>(j,i) | blur2.at<uchar>(j,i);  
-    } */   
+    //Mat med2 = Mat(img2.rows, img2.cols, CV_8UC1);
+    Mat med3 = Mat(img3.rows, img3.cols, CV_8UC1);
+    img3.copyTo(med3);
+   
+    //corrected image using median of the two images instead of OR
+    for(int i = 0; i < img2.cols; ++i) for(int j = 0; j < img2.rows; ++j){
+        if(img3.at<uchar>(j,i) == 0 ) med3.at<uchar>(j,i) = img2.at<uchar>(j,i);
+        else if(img2.at<uchar>(j,i) == 0 )  med3.at<uchar>(j,i) = img3.at<uchar>(j,i);
+        else med3.at<uchar>(j,i) = (img3.at<uchar>(j,i) + img2.at<uchar>(j,i)) /2; 
+    }  
     
     //Boolean OR of the two images to merge them
     for(int i = 0; i < img2.cols; ++i) for(int j = 0; j < img2.rows; ++j){
@@ -84,8 +84,8 @@ int main(void)
     //Display input and output
     imshow("Input1",img1);
     imshow("Input2",img2);
-    imshow("Merged",img3);
-    //imshow("Corrected",blur3);
+    imshow("Merged using OR",img3);
+    imshow("Merged using median",med3);
     waitKey(0);
 
     return 0;
