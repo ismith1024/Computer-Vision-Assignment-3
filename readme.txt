@@ -1,7 +1,7 @@
 COMP4102 
-Assignment 2
+Assignment 3
 Submitted by Ian Smith #100910972
-2018-02-28
+2018-03-21
 
 OpenCV version : 3.3.1
 Major version : 3
@@ -11,28 +11,37 @@ Subminor version : 1
 
 ===== Q1:
 
-Assumptions made:
-    - The image classifier relies on looking exclusively at the 6 largest polygons to find signs.  This is to avoid false positive stop signs when arbitrary octagons are found in the background noise, and can be interpreted as "I assume the sign is close to the camera".
-    - The Canny threshold is adaptive and is computed using the median pixel value in the image, so this assumes the grayscale image of the sign has high contrast
-    - The blur size assmes that the images are of comparable pixel dimensions to the image files used in the assignment -- cv::Size(4,4) worked best for me
-    - The minimum matchtemplate() threshold for the 40/80 signs is set slightly higher than the matchtemplate() value for the 100 km/h sign.  I am assuming that the 100 sign in the assignment is "typical" when setting the minimum threshold for 40/80.  In a real application, I would look at the statistical values for many 100 km/h signs to set the 40/80 threshold.
+I have rewritten most of the template using cv::Mat since I like the C++ class better than the C struct.  I used a singular value decomposition approach instead of eigenvalues.
     
 Instructions to run the application:
-    - Code is in: a2q1.cpp, imageclassifier.h, imageclassifier.cpp 
+    - Code is in: a3q1.cpp, a3q1.h 
     - C++ standard used was c++14
     - To compile:
-    g++ -std=c++14 a2q1.cpp imageclassifier.cpp -o a2q1 `pkg-config --libs opencv`
-    - PLEASE NOTE: The image filename is passed to the program as a command line parameter (as opposed to a hardcoded string like the template code):
-            ./a2q1 speedsign5.jpg
+    g++ -std=c++14 a3q1.cpp -o a3q1 `pkg-config --libs opencv`
+  
 
 ===== Q2:
 
-I was able to obtain 8 lines by setting edgeThresh to 100.  The rest of the code was based on the examples, so no real assumptions.
+"Notice that the final merged image has some anomalies because of the OR
+operation. In real mosaicking programs you do not see these anomalies. Write down a short
+(one paragraph) description of how you would get rid of these visible anomalies and include
+it in your upload. The answer is simple."
+
+After inspecting the pixels in both the warped and center image around the region of the anomalies, it is clear that there
+are no near-white pixels in either image.  So, I am assuming they result from the mathematical merging of the pixel values.
+One possibility is the bitwise OR operation -- for example, 01000 0000 OR 0011 1111 = 0111 1111.
+
+I have included a second merged image that calculates pixel values as follows:
+
+Mean value of the pixel in both the warped and center image, unless exactly one of the images has a black pixel there -- in this case it is the 
+value from the other image.
+    
+The merged image obtained in this way is submitted as "corrected.jpg".  The merged image from OR with the anomalies is "merged.jpg".
 
 To run:
-    - Code is in a2q2.cpp 
-    - C++ standard used was c++14
+    - Code is in a3q2.cpp 
+    - C++ standard is c++14
     - To compile:
-    g++ -std=c++14 a2q2.cpp -o a2q2 `pkg-config --libs opencv`
-    - The filename is a parameter as in Q1:
-            ./a2q2 track.jpg
+    g++ -std=c++14 a3q2.cpp -o a3q2 `pkg-config --libs opencv`
+
+Most of the template code is unchanged.

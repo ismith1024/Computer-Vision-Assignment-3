@@ -69,7 +69,6 @@ int main(){
     cv::Mat imagePoints = (cv::Mat_<double>(10,2) << 0,0,0,0,0,0,0,0,0,0);
     cv::Mat newImagePoints = (cv::Mat_<double>(10,2) << 0,0,0,0,0,0,0,0,0,0);
     cv::Mat rotationVector;
-
     cv::Mat computedProjectionMatrix;
 
 
@@ -88,52 +87,37 @@ int main(){
 
     cv::Mat translation = (cv::Mat_<double>(3,1) << projection.at<double>(0,3), projection.at<double>(1,3), projection.at<double>(2,3));
             
-    std::cout << "Rotation matrix" << std::endl;
-    std::cout << rotationMatrix << std::endl;
-    fp << "Rotation matrix" << std::endl;
-    fp << rotationMatrix << std::endl;
-    std::cout << std::endl << "Translation vector" << std::endl;
+    std::cout << "Rotation matrix" << std::endl << rotationMatrix << std::endl;
+    fp << "Rotation matrix" << std::endl << rotationMatrix << std::endl;
+    std::cout << std::endl << "Translation vector" << std::endl; 
     fp << std::endl << "Translation vector" << std::endl;
     std::cout << translation << std::endl;
     fp << translation << std::endl;	
-    std::cout << std::endl << "Camera Calibration" << std::endl;
-    std::cout << cameraMatrix << std::endl;
-    fp << std::endl << "Camera Calibration" << std::endl;
-    fp << cameraMatrix << std::endl;
+    std::cout << std::endl << "Camera Calibration" << std::endl << cameraMatrix << std::endl;
+    fp << std::endl << "Camera Calibration" << std::endl << cameraMatrix << std::endl;
 
-    std::cout << std::endl << "Intrinsic" << std::endl;
-    std::cout << intrinsic << std::endl;
+    std::cout << std::endl << "Intrinsic" << std::endl << intrinsic << std::endl;
 
-    std::cout << std::endl << "Projection" << std::endl;
-    std::cout << projection << std::endl;
+    std::cout << std::endl << "Projection" << std::endl << projection << std::endl;
 
-    std::cout << std::endl << "Object Points" << std::endl;
-    std::cout << objectPoints << std::endl;
+    std::cout << std::endl << "Object Points" << std::endl << objectPoints << std::endl;
     
-    fp << std::endl << "Intrinsic" << std::endl;
-    fp << intrinsic << std::endl;
+    fp << std::endl << "Intrinsic" << std::endl << intrinsic << std::endl;
 
-    fp << std::endl << "Projection" << std::endl;
-    fp << projection << std::endl;
+    fp << std::endl << "Projection" << std::endl << projection << std::endl;
 
-    fp << std::endl << "Object Points" << std::endl;
-    fp << objectPoints << std::endl;
+    fp << std::endl << "Object Points" << std::endl << objectPoints << std::endl;
 
     cv::Mat transposedObjectPoints = objectPoints.t();
     cv::Mat finalProjection = intrinsic * projection; 
 
-    std::cout << std::endl << "Projection" << std::endl;
-    std::cout << finalProjection << std::endl;
-    fp << std::endl << "Projection" << std::endl;
-    fp << finalProjection << std::endl;
+    std::cout << std::endl << "Projection" << std::endl << finalProjection << std::endl;
+    fp << std::endl << "Projection" << std::endl << finalProjection << std::endl;
             
     cv::Mat transposedImagePoints = finalProjection * transposedObjectPoints; 
             
-    std::cout << std::endl << "Transposed image points" << std::endl;
-    std::cout << transposedImagePoints << std::endl;
-    
-    fp << std::endl << "Transposed image points" << std::endl;
-    fp << transposedImagePoints << std::endl;
+    std::cout << std::endl << "Transposed image points" << std::endl << transposedImagePoints << std::endl;    
+    fp << std::endl << "Transposed image points" << std::endl << transposedImagePoints << std::endl;
             
     std::cout << std::endl << "Image points:" << std::endl;
     fp << std::endl << "Image points:" << std::endl;
