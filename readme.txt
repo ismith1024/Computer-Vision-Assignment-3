@@ -29,7 +29,7 @@ it in your upload. The answer is simple."
 
 After inspecting the pixels in both the warped and center image around the region of the anomalies, it is clear that there
 are no near-white pixels in either image.  So, I am assuming they result from the mathematical merging of the pixel values.
-One possibility is the bitwise OR operation -- for example, 01000 0000 OR 0011 1111 = 0111 1111.
+One possibility is the bitwise OR operation -- for example, 0100 0000 OR 0011 1111 = 0111 1111.
 
 I have included a second merged image that calculates pixel values as follows:
 
