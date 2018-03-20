@@ -14,7 +14,7 @@
 //// Subminor version : 1
 ////
 
-/*
+/* OBJECTIVE:
  The goal of this question is to create a program that take as input two images that are related
 by a rotation homography; a left (keble_a_half), middle (keble_b_long) and creates a single
 panoramic image (same size as keble_b_long) as output. This is done by warping the left
@@ -28,12 +28,15 @@ middle image. In other words you warp img1 into img3, and after that you paste (
 an OR operation) img3 into img2. You should output two images; warped, which is the
 warped version of img1, and merged which is the warped version of img1 (img3) combined
 with img2. I have included two images called warped and merged which show you how they
-should look like. Notice that the final merged image has some anomalies because of the OR
+should look like. 
+
+Notice that the final merged image has some anomalies because of the OR
 operation. In real mosaicking programs you do not see these anomalies. Write down a short
 (one paragraph) description of how you would get rid of these visible anomalies and include
 it in your upload. The answer is simple.
---Response is in ../readme.txt
 
+    ==> Response is in ../readme.txt
+                                --IS
 */
 
 #include <opencv2/features2d.hpp>
