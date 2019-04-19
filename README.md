@@ -57,13 +57,13 @@ The improved merge operation: if one pixel is black (0000 0000), then use the pi
  - Code is in: a3q1.cpp, a3q1.h 
  - C++ standard used was c++14
  - To compile:
-    `g++ -std=c++14 a3q1.cpp -o a3q1 `` `pkg-config --libs opencv` `` `
+    `g++ -std=c++14 a3q1.cpp -o a3q1 \`pkg-config --libs opencv\` `
 
 ### Part 2:
  - Code is in a3q2.cpp 
  - C++ standard is c++14
  - To compile:
-    `g++ -std=c++14 a3q2.cpp -o a3q2 `` `pkg-config --libs opencv` `` `
+    `g++ -std=c++14 a3q2.cpp -o a3q2 \`pkg-config --libs opencv\` `
 
 ## Findings<a name="results"></a>
 
